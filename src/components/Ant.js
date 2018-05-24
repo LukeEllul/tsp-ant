@@ -1,13 +1,14 @@
 const R = require('ramda');
 const { getPhero, getScore, realScore, getMax, tourLength, updatePheronome } = require('./Edge');
 const { getRow, getTourEdges, updateTour } = require('./Graph');
+const { rouletteWheele } = require('../math');
 
 /** current city -> previous cities -> tour length
  * Ant :: Number -> [Number] -> Number -> a
  */
 
 /**
- * newAnt :: Number -> [Number] -> Ant -> a
+ * newAnt :: Number -> [Number] -> Number -> Ant -> a
  */
 const newAnt = R.curry((currentNode, previousNodes, l, Ant) => Ant(currentNode, previousNodes, l));
 
@@ -46,9 +47,22 @@ const vertexProbability = R.curry((B, Ant, Graph, Edge) =>
     realScore(B, Edge) / R.sum(getUnvisitedNodes(Ant, Graph).map(realScore(B))));
 
 /**
- * despositGlobalPhero :: Number -> Ant -> Graph -> Graph
+ * pickHighestProbabilityEdge :: B -> Ant -> Graph -> Edge
  */
-const despositGlobalPhero = R.curry((rate, Ant, Graph) =>
+const pickHighestProbabilityEdge = R.curry((B, Ant, Graph) =>
+    R.pipe(
+        _ => getUnvisitedNodes(Ant, Graph),
+        edges => R.pipe(
+            R.map(vertexProbability(B, Ant, Graph)),
+            rouletteWheele,
+            i => edges[i]
+        )(edges)
+    )());
+
+/**
+ * despositGlobalPhero :: Number -> Number -> Ant -> Graph -> Graph
+ */
+const despositGlobalPhero = R.curry((P, rate, Ant, Graph) =>
     R.pipe(
         getTourEdges(getPreviousNodes(Ant)),
         tourLength,
@@ -62,10 +76,28 @@ const despositGlobalPhero = R.curry((rate, Ant, Graph) =>
 const betterAnt = R.curry((Ant1, Ant2) => getTourLength(Ant1) < getTourLength(Ant2) ? Ant1 : Ant2);
 
 /**
- * getBestAnt :: [Ant] -> Graph -> Ant
+ * getBestAnt :: [Ant] -> Ant
  */
 const getBestAnt = ants => ants.reduce(betterAnt);
 
+/**
+ * pickNextEdge :: Number -> Number -> Ant -> Graph -> Edge
+ */
+const pickNextEdge = R.curry((q, B, Ant, Graph) =>
+    Math.random() < q ? pickHighestScore(B, Ant, Graph) : pickHighestProbabilityEdge(B, Ant, Graph));
+
+/**
+ * updateAnt :: Edge -> Ant -> Ant
+ */
+const updateAnt = R.curry((Edge, Ant) =>
+    Ant(currentNode => previousNodes => l =>
+        Edge(n1 => n2 => d => _ => newAnt(n2, [...previousNodes, currentNode], l + d))));
+
 module.exports = {
-    newAnt
+    newAnt,
+    pickNextEdge,
+    updateAnt,
+    getPreviousNodes,
+    despositGlobalPhero,
+    getBestAnt
 };

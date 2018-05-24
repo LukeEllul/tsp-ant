@@ -22,6 +22,11 @@ const updateGraph = R.curry((f, y, x, Graph) =>
     Graph(graph => newGraph(R.update(y, R.update(x, f(graph[y][x]))(graph[y]))(graph))));
 
 /**
+ * nodesNumber :: Graph -> Number
+ */
+const nodesNumber = Graph => Graph(graph => graph.length);
+
+/**
  * getEdge :: Number -> Number -> Graph -> Edge
  */
 const getEdge = R.curry((y, x, Graph) => Graph(graph => graph[y][x]));
@@ -50,5 +55,6 @@ module.exports = {
     getEdge,
     getRow,
     getTourEdges,
-    updateTour
+    updateTour,
+    nodesNumber
 };
