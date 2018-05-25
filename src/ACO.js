@@ -36,6 +36,11 @@ const move = R.curry((q, B, p, rate, ants, Graph, f) =>
  * completeTour :: Number -> Number -> Number -> Number -> [Ant] -> Graph -> ([Ant] -> Graph -> a)
  */
 const completeTour = R.curry((q, B, p, rate, ants, Graph, f) =>
-    R.all(Ant => getPreviousNodes(Ant).length === nodesNumber(Graph)) ? f(ants)(despositGlobalPhero(p, rate, getBestAnt(ants), Graph)) :
+    R.all(Ant => getPreviousNodes(Ant).length === nodesNumber(Graph))(ants) ? f(ants)(despositGlobalPhero(p, rate, getBestAnt(ants), Graph)) :
         move(q, B, p, rate, ants, Graph,
             updatedAnts => updatedGraph => completeTour(q, B, p, rate, updatedAnts, updatedGraph, f)));
+
+module.exports = {
+    placeAnts,
+    completeTour
+};

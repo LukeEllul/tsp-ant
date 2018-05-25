@@ -23,7 +23,7 @@ const getScore = Edge => Edge(_ => _ => d => _ => Math.abs(1 / d));
 /**
  * realScore :: Number -> Edge -> Number
  */
-const realScore = R.curry((B, Edge) => Math.pow(getPhero(Edge) * getScore(Edge), B));
+const realScore = R.curry((B, Edge) => getPhero(Edge) === 0 ? 0 : Math.pow(getPhero(Edge) * getScore(Edge), B));
 
 /**
  * getMax :: Number -> Edge -> Edge -> Edge

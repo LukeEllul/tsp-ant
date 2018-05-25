@@ -10,7 +10,7 @@ const { rouletteWheele } = require('../math');
 /**
  * newAnt :: Number -> [Number] -> Number -> Ant -> a
  */
-const newAnt = R.curry((currentNode, previousNodes, l, Ant) => Ant(currentNode, previousNodes, l));
+const newAnt = R.curry((currentNode, previousNodes, l, Ant) => Ant(currentNode)(previousNodes)(l));
 
 /**
  * getPreviousNodes :: Ant -> [Number]
@@ -38,12 +38,12 @@ const getUnvisitedNodes = R.curry((Ant, Graph) =>
 /**
  * pickHighestScore :: B -> Ant -> Graph -> Edge
  */
-const pickHighestScore = R.curry((B, Ant, Graph) => getUnvisitedNodes(Ant, Graph).reduce(getMax(B)));
+const pickHighestScore = R.curry((B, Ant, Graph) => getUnvisitedNodes(Ant, Graph).reduce((E1, E2) => getMax(B, E1, E2)));
 
 /**
  * vertexProbability :: B -> Ant -> Graph -> Edge -> Number
  */
-const vertexProbability = R.curry((B, Ant, Graph, Edge) =>
+const vertexProbability = R.curry((B, Ant, Graph, Edge) => realScore(B, Edge) === 0 ? 0 :
     realScore(B, Edge) / R.sum(getUnvisitedNodes(Ant, Graph).map(realScore(B))));
 
 /**
@@ -99,5 +99,6 @@ module.exports = {
     updateAnt,
     getPreviousNodes,
     despositGlobalPhero,
-    getBestAnt
+    getBestAnt,
+    getTourLength
 };
